@@ -3,11 +3,24 @@
 set -ex
 set -o pipefail
 
+_cpu_type() {
+  local machine_hardware_name
+  machine_hardware_name=${ASDF_OVERWRITE_ARCH:-"$(uname -m)"}
+
+  case "${machine_hardware_name}" in
+    'x86_64') local cpu_type="amd64" ;;
+    'aarch64') local cpu_type="arm64" ;;
+    *) local cpu_type="${machine_hardware_name}" ;;
+  esac
+
+  echo "${cpu_type}"
+}
+
 install_aws-iam-authenticator() {
   local install_type=$1
   local version=$2
   local install_path=$3
-  local platform="$(uname | tr '[:upper:]' '[:lower:]')_amd64"
+  local platform="$(uname | tr '[:upper:]' '[:lower:]')_$(_cpu_type)"
   local bin_install_path="$install_path/bin"
   local binary_path="$bin_install_path/aws-iam-authenticator"
   local download_url=$(get_download_url $version $platform)
